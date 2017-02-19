@@ -55,7 +55,7 @@ class AccountServiceImplTest {
                 () -> accountService.withdrawAmount(accountId, BigDecimal.valueOf(2)));
 
         // then
-        assertThat(throwable.getMessage()).isEqualTo("Cannot found the accountId: 1000");
+        assertThat(throwable.getMessage()).isEqualTo("Could not find accountId: 1000");
 
     }
 

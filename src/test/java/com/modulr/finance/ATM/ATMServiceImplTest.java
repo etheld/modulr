@@ -4,16 +4,10 @@ import com.modulr.finance.account.AccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,12 +22,10 @@ class ATMServiceImplTest {
 
     private AccountService accountServiceMock;
 
-    private static Map<Integer, Integer> BANK_NOTES = new HashMap<>();
-
     @BeforeEach
     void setup() {
         accountServiceMock = Mockito.mock(AccountService.class);
-        atmService = new ATMServiceImpl(accountServiceMock, BANK_NOTES);
+        atmService = new ATMServiceImpl(accountServiceMock);
         atmService.replenish();
     }
 
@@ -45,7 +37,8 @@ class ATMServiceImplTest {
         atmService.getBankNotes().put(5, 0);
 
         // when
-        Throwable throwable = assertThrows(IllegalStateException.class, () -> atmService.withdrawAmount(1001, 20));
+        Throwable throwable = assertThrows(IllegalStateException.class,
+                () -> atmService.withdrawAmount(1001, 20));
 
         // then
         assertThat(throwable.getMessage()).isEqualTo("Not enough bank notes");
@@ -69,7 +62,8 @@ class ATMServiceImplTest {
     @DisplayName("withdrawAmount throws an exception if the amount is less than 20")
     void withDrawAmount_withLessThan20() {
         // when
-        Throwable throwable = assertThrows(IllegalArgumentException.class, () -> atmService.withdrawAmount(1001, 1));
+        Throwable throwable = assertThrows(IllegalArgumentException.class,
+                () -> atmService.withdrawAmount(1001, 1));
 
         // then
         assertThat(throwable.getMessage()).isEqualTo("Cannot withdraw less than 20");
@@ -80,7 +74,8 @@ class ATMServiceImplTest {
     void withDrawAmount_withMoreThan250() {
 
         //when
-        Throwable throwable = assertThrows(IllegalArgumentException.class, () -> atmService.withdrawAmount(1001, 251));
+        Throwable throwable = assertThrows(IllegalArgumentException.class,
+                () -> atmService.withdrawAmount(1001, 251));
 
         //then
         assertThat(throwable.getMessage()).isEqualTo("Cannot withdraw more than 250");
@@ -95,7 +90,8 @@ class ATMServiceImplTest {
         doThrow(new IllegalArgumentException("Cannot withdraw")).when(accountServiceMock).withdrawAmount(accountId, BigDecimal.valueOf(amount));
 
         // when
-        Throwable throwable = assertThrows(IllegalArgumentException.class, () -> atmService.withdrawAmount(accountId, amount));
+        Throwable throwable = assertThrows(IllegalArgumentException.class,
+                () -> atmService.withdrawAmount(accountId, amount));
 
         // then
         assertThat(throwable.getMessage()).isEqualTo("Cannot withdraw");
@@ -163,6 +159,23 @@ class ATMServiceImplTest {
 
         // then
         assertThat(notes).containsExactlyInAnyOrder(20, 10);
+    }
+
+    @Test
+    @DisplayName("withdrawAmount throws an exception when it is not dividable by 5, for example 23")
+    void withDrawAmount_returns_exception_for_23() {
+        atmService.getBankNotes().put(5, 1);
+        // given
+        Integer amount = 23;
+        int accountId = 1001;
+        given(accountServiceMock.withdrawAmount(accountId, BigDecimal.valueOf(amount))).willReturn(true);
+
+        // when
+        Throwable throwable = assertThrows(IllegalArgumentException.class,
+                () -> atmService.withdrawAmount(accountId, amount));
+
+        // then
+        assertThat(throwable.getMessage()).isEqualTo("Sorry, the ATM cannot hand out 23 as it is not dividable by 5");
     }
 
 }

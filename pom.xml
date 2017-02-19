@@ -15,6 +15,7 @@
         <junit.platform.version>1.0.0-M3</junit.platform.version>
         <assertjs.version>3.6.2</assertjs.version>
         <mockito-core.version>2.7.7</mockito-core.version>
+        <logback.version>1.2.1</logback.version>
     </properties>
 
     <dependencies>
@@ -37,6 +38,12 @@
             <artifactId>mockito-core</artifactId>
             <version>${mockito-core.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
         </dependency>
 
     </dependencies>
